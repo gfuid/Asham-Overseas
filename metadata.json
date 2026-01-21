@@ -1,0 +1,7 @@
+{
+  "name": "Asham Overseas - Premium Home Textiles",
+  "description": "A modern, high-end commercial website for Asham Overseas, a leading manufacturer and wholesaler of premium bed linen, sofa fabrics, and designer curtains based in Panipat.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

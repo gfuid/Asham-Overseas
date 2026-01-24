@@ -51,7 +51,7 @@ const Navbar: React.FC = () => {
             <img
               src={logoImg}
               alt="Company Logo"
-              className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="h-40 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </div>
 

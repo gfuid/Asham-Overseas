@@ -1,132 +1,161 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, Phone, MessageSquare } from 'lucide-react';
-import { BUSINESS_INFO } from '../constants';
-// Import the image from your local directory
-import logoImg from './image.png';
+import React, { useState, useEffect, useCallback } from "react";
+import { Menu, X, Phone, ArrowRight, MessageSquare } from "lucide-react";
+import { BUSINESS_INFO } from "../constants";
+import logoImg from "./image.png";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  // Handle scroll background change
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen]);
+
   const navItems = [
-    { name: 'Home', href: '#home' },
-    { name: 'Products', href: '#products' },
-    { name: 'About', href: '#about' },
-    { name: 'Reviews', href: '#reviews' }
+    { name: "Home", href: "#home" },
+    { name: "Products", href: "#products" },
+    { name: "About", href: "#about" },
+    { name: "Reviews", href: "#reviews" },
+    { name: "Contact", href: "#contact" },
   ];
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      const offset = 80;
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = target.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+  const handleNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault();
       setIsOpen(false);
-    }
-  };
+
+      const target = document.querySelector(href);
+
+      if (target) {
+        const offset = 80;
+        const top =
+          target.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+          top,
+          behavior: "smooth",
+        });
+      }
+    },
+    []
+  );
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass-nav shadow-xl py-2' : 'bg-transparent py-4'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
-          {/* LOGO SECTION */}
-          <div
-            className="flex-shrink-0 cursor-pointer group"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+    <>
+      {/* NAVBAR */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+          ? "bg-white/95 backdrop-blur-md shadow-md py-3"
+          : "bg-white/80 backdrop-blur-md py-4"
+          }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+
+          {/* LOGO */}
+          <button
+            onClick={() =>
+              window.scrollTo({ top: 0, behavior: "smooth" })
+            }
+            className="flex items-center"
           >
             <img
               src={logoImg}
-              alt="Company Logo"
-              className="h-40 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              alt="Logo"
+              className="h-24 w-auto object-contain"
             />
-          </div>
+          </button>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-10 items-center">
+          {/* DESKTOP MENU */}
+          <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className="text-slate-600 hover:text-indigo-600 font-bold text-xs uppercase tracking-widest transition-colors relative group"
+                className="font-semibold text-slate-700 hover:text-indigo-600 transition"
               >
                 {item.name}
-                <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-indigo-600 transition-all group-hover:w-full"></span>
               </a>
             ))}
+
             <a
               href="#contact"
-              onClick={(e) => handleNavClick(e, '#contact')}
-              className="bg-slate-900 text-white px-8 py-3 rounded-none hover:bg-indigo-600 shadow-xl transition-all font-bold flex items-center gap-2 transform hover:-translate-y-0.5"
+              onClick={(e) => handleNavClick(e, "#contact")}
+              className="bg-indigo-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-indigo-700 transition flex items-center gap-2"
             >
               <MessageSquare size={16} />
-              Enquire Now
+              Enquire
             </a>
-          </div>
+          </nav>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-slate-900 p-2 focus:outline-none bg-white rounded-xl shadow-sm border border-slate-100"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          {/* MOBILE BUTTON */}
+          <button
+            className="md:hidden"
+            onClick={() => setIsOpen(true)}
+          >
+            <Menu size={28} />
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 bg-white z-[60] md:hidden transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
-        <div className="flex flex-col h-full p-8">
-          <div className="flex justify-between items-center mb-16">
-            {/* MOBILE LOGO */}
-            <img src={logoImg} alt="Logo" className="h-12 w-auto object-contain" />
-            <button onClick={() => setIsOpen(false)} className="p-3 bg-slate-50 rounded-2xl"><X size={24} /></button>
-          </div>
+      {/* MOBILE MENU */}
+      <div
+        className={`fixed inset-0 z-50 bg-white transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+      >
+        {/* HEADER */}
+        <div className="flex justify-between items-center p-6 border-b">
+          <img src={logoImg} className="h-8" />
+          <button onClick={() => setIsOpen(false)}>
+            <X size={28} />
+          </button>
+        </div>
 
-          <div className="space-y-8 flex-grow">
-            {navItems.concat([{ name: 'Contact', href: '#contact' }]).map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => {
-                  setIsOpen(false);
-                  handleNavClick(e, item.href);
-                }}
-                className="block text-5xl font-bold text-slate-900 hover:text-indigo-600 transition-colors"
-              >
-                {item.name}
-              </a>
-            ))}
-          </div>
-
-          <div className="pt-10 border-t border-slate-100">
+        {/* LINKS */}
+        <nav className="flex flex-col gap-6 p-8">
+          {navItems.map((item) => (
             <a
-              href={`tel:${BUSINESS_INFO.phone}`}
-              className="flex items-center justify-center gap-3 bg-indigo-600 text-white w-full py-5 rounded-none font-bold text-xl shadow-2xl"
+              key={item.name}
+              href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
+              className="text-2xl font-bold text-slate-800 flex justify-between items-center"
             >
-              <Phone size={24} />
-              Call Specialist
+              {item.name}
+              <ArrowRight size={20} />
             </a>
-          </div>
+          ))}
+        </nav>
+
+        {/* FOOTER */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
+          <a
+            href={`tel:${BUSINESS_INFO.phone}`}
+            className="bg-indigo-600 text-white w-full py-4 rounded-xl flex justify-center items-center gap-3 font-semibold"
+          >
+            <Phone size={20} />
+            Call Specialist
+          </a>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 
